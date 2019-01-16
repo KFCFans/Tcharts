@@ -15,5 +15,9 @@
 - [ ] 可定制参数的前端UI
 - [ ] 支持只显示指定数量的数据（前N条）
 
+## 效果～
+
+![image](https://github.com/LoveAlwaysYoung/Tcharts/blob/master/img/TCharts_example.gif)
+
 
 
