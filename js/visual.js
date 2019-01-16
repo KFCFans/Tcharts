@@ -1,24 +1,14 @@
+// 控制元素
+let isBig=false;
+
 // 定义属性集
 const width=1800;
 const height=800;
 const rectHeight=26;
-const margin={left:250,right:150,top:180,bottom:0};
+const margin={left:250,right:150,top:20,bottom:0};
 const innerWidth=width-margin.left-margin.right;
 const innerHeight=height-margin.top-margin.bottom;
-const interval_time=0.5
-
-// 临时测试数据,传入时需要按照时间排序（暂定）
-let data=[
-    {name: "张三", type: "魔法师", value: "12312", date: "01-01"},
-    {name: "李四", type: "战士", value: "21412", date: "01-01"},
-    {name: "王二麻子", type: "魔法师", value: "41243", date: "01-01"},
-    {name: "张三", type: "魔法师", value: "22312", date: "01-02"},
-    {name: "李四", type: "战士", value: "61412", date: "01-02"},
-    {name: "王二麻子", type: "魔法师", value: "11243", date: "01-02"},
-    {name: "张三", type: "魔法师", value: "32312", date: "01-03"},
-    {name: "李四", type: "战士", value: "11412", date: "01-03"},
-    {name: "王二麻子", type: "魔法师", value: "51243", date: "01-03"}
-];
+const interval_time=0.5;
 
 let colors=[];
 let dateList=[];
@@ -38,8 +28,8 @@ function initDateAndColor() {
 
     let index=0;
     let baseColors=[
-        "#FFB6C1","#00FFFF","#C71585","#FFFF00","#7B68EE","#0000CD","#000080",
-        "#87CEFA","#DC143C","#F5FFFA","#8B008B","#FFD700","#FFA500","#FF8C00",
+        "#FFB6C1","#2EA9DF","#C71585","#FFC012","#7B68EE","#0000CD","#000080",
+        "#87CEFA", "#DC143C", "#39C5BB", "#009714","#FFD700","#FFA500","#FF8C00",
     ];
 
     data.forEach(e=>{
@@ -85,7 +75,7 @@ let xAxis=d3.axisBottom()
     .ticks(10)
     .tickPadding(20)
     .tickFormat(d=>{
-        return d<=0?'':d;
+        return d<0?'':d;
     })
     .tickSize(-innerHeight);
 let yAxis=d3.axisLeft()
@@ -105,7 +95,11 @@ function redraw() {
     // 更新比例尺
     let x_min=d3.min(currentData,xValue);
     let x_max=d3.max(currentData,xValue);
-    xScale.domain([2*x_min-x_max,x_max+10]).range([0,innerWidth]);
+    if (isBig){
+        xScale.domain([2*x_min-x_max,x_max+10]).range([0,innerWidth]);
+    } else{
+        xScale.domain([0,x_max+1]).range([0,innerWidth]);
+    }
     yScale.domain(currentData.map(e=>e.name).reverse()).range([innerHeight,0]);
 
     xAxisG.transition().duration(3000*interval_time).ease(d3.easeLinear).call(xAxis);
@@ -116,7 +110,7 @@ function redraw() {
     // 选中所有bar并绑定数据（指定key函数）
     let bar=g.selectAll(".bar").data(currentData,e=>e.name);
 
-    // enter
+    // enter，起始动画
     let barEnter=bar.enter()
         .append("g")
         .attr("class","bar")
@@ -201,7 +195,7 @@ function redraw() {
         .attr("stroke-width", "1px")
         .attr("fill-opacity",1);
 
-    // update,有可能是全新的一套数据，但是bar的位置已经确定，只需要更改颜色和样式即可
+    // update（更新动态）,有可能是全新的一套数据，但是bar的位置已经确定，只需要更改颜色和样式即可
     let barUpdate=bar.transition().duration(2950*interval_time).ease(d3.easeLinear);
 
     barUpdate.select(".label")
@@ -250,7 +244,6 @@ function change() {
 }
 
 
-initDateAndColor();
 
 function draw() {
     if(dateIndex<dateList.length){
@@ -261,4 +254,15 @@ function draw() {
         dateIndex++;
     }
 }
-setInterval(draw,1500);
+
+$('#inputfile').change(function () {
+    $('#inputfile').attr('hidden', true);
+    var r = new FileReader();
+    r.readAsText(this.files[0], "GBK");
+    r.onload = function () {
+        //读取完成后，数据保存在对象的result属性中
+        data = d3.csvParse(this.result);
+        initDateAndColor();
+        setInterval(draw,1500);
+    }
+});
