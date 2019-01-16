@@ -230,7 +230,12 @@ function redraw() {
     g.select(".dateLabel")
         .text(dateList[dateIndex]);
 
-    // exit
+    // exit,准备删除多余的图形
+    let barExit = bar.exit().transition().duration(2500 * interval_time);
+    barExit.attr("transform",'translate(0,${innerHeight+50})')
+        .attr("fill-opacity", 0)
+        .remove();
+
 }
 
 function change() {
@@ -242,8 +247,6 @@ function change() {
             return "translate(0," + yScale(yValue(d)) + ")";
         })
 }
-
-
 
 function draw() {
     if(dateIndex<dateList.length){
